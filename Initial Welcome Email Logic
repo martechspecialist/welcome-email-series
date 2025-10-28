@@ -1,0 +1,45 @@
+%%[
+
+/* RETRIEVE FIELDS FROM DE */
+SET @venueID = [VenueID]
+SET @firstName = [First Name]
+
+/* FIRST NAME CLEANING */
+IF NOT EMPTY(@firstName) THEN 
+    SET @firstNameTrim = Trim(@firstName)
+    SET @finalName = Propercase(@firstNameTrim)
+ELSE 
+    SET @finalName = "Valued Member"
+ENDIF
+
+SET @rows = LookupRows("Venue", "VenueID", @venueID)
+
+SET @rowCount = rowcount(@rows)
+
+/* CHECKS IF THERE IS A ROW THAT EXISTS */
+IF @rowCount > 0 THEN
+
+  SET @row = row(@rows,1)
+
+ SET @venueName = field(@row, "VenueName")
+      IF IndexOf(@venueName, "The ") > 0 THEN
+        SET @venueWithThe = @venueName
+        SET @venueWithoutThe = REPLACE(@venueName, "The ", "")
+      ELSE
+        SET @venueWithThe = CONCAT("The ", @venueName)
+        SET @venueWithoutThe = @venueName
+      ENDIF
+  SET @logoURL = field(@row, "LogoURL")
+  SET @address = field(@row, "Address")
+  SET @contactInfo = field(@row, "ContactInfo")
+  SET @facebookLink = field(@row, "FacebookLink")
+  SET @venueManager = field(@row, "VenueManager")
+  
+/* IF THE ROW DOES NOT EXIST */
+ELSE
+  
+  /* THIS FUNCTION WILL CANCEL THE EMAIL OR SMS SEND */
+  RaiseError("No row was found")  
+
+ENDIF
+]%%
